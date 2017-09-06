@@ -1,0 +1,7 @@
+package {{.ProjectName}}
+
+import "net/http"
+
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	httpJSON(w, "Hello, world")
+}

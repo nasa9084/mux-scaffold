@@ -1,0 +1,6 @@
+package: github.com/nasa9084/mux-scaffold
+import:
+- package: github.com/mgutz/ansi
+- package: bitbucket.org/pkg/inflect
+- package: github.com/go-sql-driver/mysql
+  version: v1.3

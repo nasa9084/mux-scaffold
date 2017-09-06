@@ -1,0 +1,33 @@
+package {{.ProjectName}}
+
+import (
+	"net/http"
+
+	"github.com/gorilla/mux"
+	log "github.com/nasa9084/go-logger"
+)
+
+type Server struct {
+	*mux.Router
+}
+
+func New() *Server {
+	s := Server{
+		Router: mux.NewRouter(),
+	}
+	s.setupRoutes()
+	return &s
+}
+
+func Run(listen string) error {
+	s := New()
+	log.Infof("Server listening on %s", listen)
+	return http.ListenAndServe(listen, s.Router)
+}
+
+func (s *Server) setupRoutes() {
+	log.Info("Initialize Routings...")
+
+	r := s.Router
+	r.HandleFunc(`/`, HealthCheckHandler)
+}

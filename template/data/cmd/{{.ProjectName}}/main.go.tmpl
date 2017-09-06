@@ -1,0 +1,43 @@
+package main
+
+import (
+	"os"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/jessevdk/go-flags"
+	"github.com/nasa9084/go-logger"
+	"{{.PackageName}}/db"
+	"{{.PackageName}}"
+)
+
+type options struct {
+	Listen string `short:"l" long:"listen" default:":8080" description:"Listen address"`
+	DBUser string `long:"db-user" default:"root" env:"DB_USER" description:"database user"`
+	DBPass string `long:"db-password" default:"" env:"DB_PASSWORD" description:"database password"`
+	DBAddr string `long:"db-addr" default:"127.0.0.1" env:"DB_ADDR" description:"database address"`
+	DBPort string `long:"db-port" default:"3306" env:"DB_PORT" description:"database port"`
+	DBName string `long:"db-name" default:"{{.PackageName}}" env:"DB_NAME" description:"database name"`
+}
+
+func main() { os.Exit(exec()) }
+
+func exec() int {
+	log := logger.New(os.Stdout, "", logger.InfoLevel)
+	var opts options
+	if _, err := flags.Parse(&opts); err != nil {
+		log.Errorf("%s", err)
+		return 1
+	}
+	db.Init(&mysql.Config{
+		User:      opts.DBUser,
+		Net:       "tcp",
+		Addr:      opts.DBAddr + ":" + opts.DBPort,
+		ParseTime: true,
+		DBName:    opts.DBName,
+	})
+	if err := {{.ProjectName}}.Run(opts.Listen); err != nil {
+		log.Errorf("%s", err)
+		return 1
+	}
+	return 0
+}
