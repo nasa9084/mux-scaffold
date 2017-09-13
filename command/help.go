@@ -4,7 +4,7 @@ import "fmt"
 
 const (
 	helpDescription = `mux-scaffold help command prints help about the given command.`
-	helpHelp     = `Usage:
+	helpHelp        = `Usage:
         mux-scaffold help <command name>
 
 Description:

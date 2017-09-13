@@ -61,7 +61,7 @@ func (c *Init) Exec(args []string) int {
 	c.ProjectDir = dir
 	c.DBNamePrefix = filepath.Base(dir)
 	c.PackageName = path.Join(root, c.ProjectName)
-	dirsToCreate = append(dirsToCreate, filepath.Join("cmd/",c.ProjectName))
+	dirsToCreate = append(dirsToCreate, filepath.Join("cmd/", c.ProjectName))
 	c.createLayout()
 
 	//c.installFiles("helpers")
