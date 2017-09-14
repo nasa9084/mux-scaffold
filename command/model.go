@@ -39,6 +39,7 @@ type Model struct {
 	InstanceNamePlural string
 	TemplateName       string
 	Fields             map[string]Field
+	FieldNames         []string
 }
 
 // Exec to implements command interface
@@ -55,6 +56,10 @@ func (c *Model) Exec(args []string) int {
 	c.PackageName = template.PackageName()
 
 	c.Fields = processFields(args[1:])
+	c.FieldNames = []string{}
+	for k := range c.Fields {
+		c.FieldNames = append(c.FieldNames, k)
+	}
 
 	outPath := filepath.Join("model", inflect.Underscore(c.ModelName)+".go")
 
@@ -62,7 +67,7 @@ func (c *Model) Exec(args []string) int {
 	builder.WriteToPath(outPath, c)
 
 	outPath = filepath.Join("db", inflect.Underscore(c.ModelName)+".go")
-	builder = template.NewBuilder("db.go.tmp")
+	builder = template.NewBuilder(filepath.Join("db", "dbmodel.go.tmpl"))
 	builder.WriteToPath(outPath, c)
 	return 0
 }
