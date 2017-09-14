@@ -25,6 +25,7 @@ Example:
 
 var dirsToCreate = []string{
 	"db",
+	"model",
 }
 
 // Init command
