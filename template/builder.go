@@ -93,11 +93,13 @@ var (
 	}
 )
 
+// Builder is Template builder
 type Builder struct {
 	TemplateName string
 	TemplatePath string
 }
 
+// NewBuilder returns a new Buildler obj
 func NewBuilder(templatePath string) *Builder {
 	if !filepath.IsAbs(templatePath) {
 		templatePath = TemplatePath(templatePath)
@@ -112,6 +114,7 @@ func NewBuilder(templatePath string) *Builder {
 	return builder
 }
 
+// Template returns template the builder pointing
 func (builder *Builder) Template() *template.Template {
 	contents := LoadTemplateFromFile(builder.TemplatePath)
 	tmpl := template.Must(template.New(builder.TemplateName).Funcs(funcMap).Parse(contents))
@@ -127,6 +130,7 @@ func (builder *Builder) Write(writer io.Writer, data interface{}) {
 	}
 }
 
+// WriteToPath write a file using template
 func (builder *Builder) WriteToPath(outputPath string, data interface{}) {
 	printAction("green+h:black", "create", outputPath)
 	if _, err := os.Stat(outputPath); err == nil {
@@ -143,6 +147,7 @@ func (builder *Builder) WriteToPath(outputPath string, data interface{}) {
 	builder.Write(f, data)
 }
 
+// InsertAfterToPath insert something to given path
 func (builder *Builder) InsertAfterToPath(outputPath, after string, data interface{}) {
 	printAction("cyan+h:black", "insert", outputPath)
 
