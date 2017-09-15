@@ -26,6 +26,7 @@ Example:
 var dirsToCreate = []string{
 	"db",
 	"model",
+	"service",
 }
 
 // Init command
@@ -73,6 +74,7 @@ func (c *Init) Exec(args []string) int {
 	c.installFile("", "main.go.tmpl", c.ProjectName+".go")
 	c.installFile("", "handlers.go.tmpl", "handlers.go")
 	c.installFile("", "httputils.go.tmpl", "httputils.go")
+	c.installFile("service", "service_interface.go.tmpl", "interface.go")
 	return 0
 }
 

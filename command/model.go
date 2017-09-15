@@ -62,12 +62,15 @@ func (c *Model) Exec(args []string) int {
 	}
 
 	outPath := filepath.Join("model", inflect.Underscore(c.ModelName)+".go")
-
 	builder := template.NewBuilder(filepath.Join("model", "model.go.tmpl"))
 	builder.WriteToPath(outPath, c)
 
 	outPath = filepath.Join("db", inflect.Underscore(c.ModelName)+".go")
 	builder = template.NewBuilder(filepath.Join("db", "dbmodel.go.tmpl"))
+	builder.WriteToPath(outPath, c)
+
+	outPath = filepath.Join("service", inflect.Underscore(c.ModelName)+".go")
+	builder = template.NewBuilder(filepath.Join("service", "servicemodel.go.tmpl"))
 	builder.WriteToPath(outPath, c)
 	return 0
 }

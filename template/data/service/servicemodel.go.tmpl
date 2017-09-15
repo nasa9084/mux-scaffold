@@ -1,0 +1,71 @@
+package service
+
+import (
+	"database/sql"
+	"log"
+
+	"{{.PackageName}}/db"
+	"{{.PackageName}}/model"
+	"github.com/pkg/errors"
+)
+
+type {{.ModelName}}Service interface{}
+
+// Create {{.ModelName}}
+func (v *{{.ModelName}}Service) Create(tx *sql.Tx, {{.InstanceName}} *db.{{.ModelName}}) error {
+	log.Printf("service.{{.ModelName}}.Create %s", {{.InstanceName}}.ID)
+
+	if err := {{.InstanceName}}.Create(tx); err != nil {
+		return errors.Wrap(err, `creating db.{{.ModelName}}`)
+	}
+	return nil
+}
+
+// Lookup {{.ModelName}}
+func (v *{{.ModelName}}Service) Lookup(tx *sql.Tx, id string) (*model.{{.ModelName}}, error) {
+	log.Printf("service.{{.ModelName}}.Lookup %s", id)
+
+	var {{.InstanceName}}Model model.{{.ModelName}}
+	if err := {{.InstanceName}}Model.Load(tx, id); err != nil {
+		return nil, errors.Wrap(err, `loading model.{{.ModelName}}`)
+	}
+	return &{{.InstanceName}}Model, nil
+}
+
+// Update {{.ModelName}}
+func (v *{{.ModelName}}Service) Update(tx *sql.Tx, {{.InstanceName}} *db.{{.ModelName}}) error {
+	log.Printf("service.{{.ModelName}}.Update %s", {{.InstanceName}}.ID)
+	if err := {{.InstanceName}}.Update(tx); err != nil {
+		return errors.Wrap(err, `updating db.{{.ModelName}}`)
+	}
+	return nil
+}
+
+// Delete {{.ModelName}}
+func (v *{{.ModelName}}Service) Delete(tx *sql.Tx, id string) error {
+	log.Printf("service.{{.ModelName}}.Delete %s", id)
+
+	{{.InstanceName}} := db.{{.ModelName}}{ID: id}
+	if err := {{.InstanceName}}.Delete(tx); err != nil {
+		return errors.Wrap(err, `deleting db.{{.ModelName}}`)
+	}
+	return nil
+}
+
+// Listup {{.ModelName}}
+func (v *{{.ModelName}}Service) Listup(tx *sql.Tx) (model.{{.ModelNamePlural}}, error) {
+	log.Printf("service.{{.ModelName}}.Listup")
+
+	var {{.InstanceNamePlural}} db.{{.ModelNamePlural}}
+	if err := {{.InstanceNamePlural}}.Listup(tx); err != nil {
+		return nil, errors.Wrap(err, `loading {{.ModelNamePlural}}`)
+	}
+	l := make(model.{{.ModelNamePlural}}, len({{.InstanceNamePlural}}))
+	for i, {{.InstanceName}} := range {{.InstanceNamePlural}} {
+		if err := l[i].FromDB(&{{.InstanceName}}); err != nil {
+			return nil, errors.Wrap(err, `converting db.{{.ModelName}} to model.{{.ModelName}}`)
+		}
+	}
+
+	return l, nil
+}
