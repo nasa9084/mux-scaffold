@@ -17,6 +17,12 @@ go get github.com/nasa9084/mux-scaffold
 mux-scaffold init <project path>
 ```
 
+### Create a model
+
+``` shell
+mux-scaffold model <model name> <field name>:<field type> ...
+```
+
 ### Thanks
 
 This is based on [dcu/gin-scaffold](https://github.com/dcu/gin-scaffold)
