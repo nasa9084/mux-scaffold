@@ -95,7 +95,7 @@ func ({{.InstanceName}} *{{.ModelName}}) Delete(tx *sql.Tx) error {
 	if {{.InstanceName}}.ID == "" {
 		return errors.New(`{{.ModelName}} ID is not valid`)
 	}
-	log.Printf("db.{{.ModelName}}.Delete %s", u.ID)
+	log.Printf("db.{{.ModelName}}.Delete %s", {{.InstanceName}}.ID)
 
 	stmt := bytes.Buffer{}
 	stmt.WriteString(`DELETE FROM `)
