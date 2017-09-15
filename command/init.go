@@ -63,6 +63,9 @@ func (c *Init) Exec(args []string) int {
 	c.ProjectDir = dir
 	c.DBNamePrefix = filepath.Base(dir)
 	c.PackageName = path.Join(root, c.ProjectName)
+	if args[0] == "." {
+		c.PackageName = root
+	}
 	dirsToCreate = append(dirsToCreate, filepath.Join("cmd/", c.ProjectName))
 	c.createLayout()
 
