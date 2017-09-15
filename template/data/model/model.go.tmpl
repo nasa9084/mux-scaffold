@@ -1,0 +1,70 @@
+package model
+
+import (
+	"database/sql"
+	"log"
+
+	"{{.PackageName}}/db"
+	"github.com/pkg/errors"
+)
+
+type {{.ModelName}} struct {
+	ID string `json:"id"`
+{{range $fieldName, $field := .Fields}}\
+	{{$fieldName}} {{$field.FieldType}} `json:"{{$fieldName | Underscore}}"`
+{{end}}\
+}
+
+type {{.ModelNamePlural}} []{{.ModelName}}
+
+// Load with {{.InstanceName}} ID
+func ({{.InstanceName}} *{{.ModelName}}) Load(tx *sql.Tx, id string) (err error) {
+	log.Printf("model.{{.ModelName}}.Load %s", id)
+
+	{{.InstanceName}}DB := db.{{.ModelName}}
+	if err := {{.InstanceName}}DB.Load(tx, id); err != nil {
+		return errors.Wrap(err, "loading db.{{.ModelName}}")
+	}
+	if err := {{.InstanceName}}.FromDB(&{{.InstanceName}}DB); err != nil {
+		return errors.Wrap(err, "scanning db.{{.ModelName}}")
+	}
+	return nil
+}
+
+// FromDB binds db.{{.ModelName}} to model.{{.ModelName}}
+func ({{.InstanceName}} *{{.ModelName}}) FromDB({{.InstanceName}}DB *db.{{.ModelName}}) error {
+	log.Printf("model.{{.ModelName}}.FromDB")
+	{{.InstanceName}}.ID = {{.InstanceName}}DB.ID
+{{$self := . }}\
+{{range $fieldName, $_ := .Fields}}\
+	{{$self.InstanceName}}.{{$fieldName}} = {{$self.InstanceName}}DB.{{$fieldName}}
+{{end}}\
+	return nil
+}
+
+// ToDB binds model.{{.ModelName}} to model.{{.ModelName}}
+func ({{.InstanceName}} *{{.ModelName}}) ToDB({{.InstanceName}}DB *db.{{.ModelName}}) error {
+	log.Printf("model.{{.ModelName}}.ToDB")
+	{{.InstanceName}}DB.ID = {{.InstanceName}}.ID
+{{ $self := . }}\
+{{ range $fieldName, $_ := .Fields}}\
+	{{$self.InstanceName}}DB.{{$fieldName}} = {{$self.InstanceName}}.{{$fieldName}}
+{{end}}\
+}
+
+// sort.Interface implementation
+
+// Len returns the number of elements
+func ({{.InstanceNamePlural}} {{.ModelNamePlural}}) Len() int {
+	return len({{.InstanceNamePlural}})
+}
+
+// Swap two elements
+func ({{.InstanceNamePlural}} {{.ModelNamePlural}}) Swap(i, j int) {
+	{{.InstanceNamePlural}}[i], {{.InstanceNamePlural}}[j] = {{.InstanceNamePlural}}[j], {{.InstanceNamePlural}}[i]
+}
+
+// Less for sort
+func ({{.InstanceNamePlural}} {{.ModelNamePlural}}) Les(i, j int) bool {
+	return {{.InstanceNamePlural}}[i].ID < {{.InstanceNamePlural}}[j].ID
+}

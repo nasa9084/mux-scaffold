@@ -55,6 +55,41 @@ var (
 			}
 			return origin
 		},
+		"mapUnderscore": func(strs []string) []string {
+			ret := []string{}
+			for _, s := range strs {
+				ret = append(ret, inflect.Underscore(s))
+			}
+			return ret
+		},
+		"prefix": func(prefix, str string) string {
+			return prefix + str
+		},
+		"suffix": func(str, suffix string) string {
+			return str + suffix
+		},
+		"mapPrefix": func(strs []string, prefix string) []string {
+			ret := []string{}
+			for _, s := range strs {
+				ret = append(ret, prefix + s)
+			}
+			return ret
+		},
+		"mapSuffix": func(strs []string, suffix string) []string {
+			ret := []string{}
+			for _, s := range strs {
+				ret = append(ret, s + suffix)
+			}
+			return ret
+		},
+		"join": strings.Join,
+		"joinfptr": func(prefix string, strs []string, sep string) string {
+			ret := []string{}
+			for _, s := range strs {
+				ret = append(ret, "&" + prefix + "." + s)
+			}
+			return strings.Join(ret, ", ")
+		},
 	}
 )
 

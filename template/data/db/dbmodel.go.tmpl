@@ -1,0 +1,148 @@
+package db
+
+import (
+"bytes"
+"database/sql"
+"log"
+"time"
+
+"{{.PackageName}}/utils"
+"github.com/pkg/errors"
+)
+
+const (
+{{.InstanceName}}Table = `{{.InstanceNamePlural}}`
+{{.InstanceName}}SelectColumns = `id, {{ToLower (join .FieldNames ", ")}}`
+)
+
+type {{.ModelName}} struct {
+	ID         string
+{{range $fieldName, $field := .Fields}}\
+	{{$fieldName}} {{$field.FieldType}}
+{{end}}\
+	CreatedOn  time.Time
+	ModifiedOn mysql.NullTime
+}
+
+// UserList type
+type {{.ModelNamePlural}} []{{.ModelName}}
+
+// Scan raw database row to user
+func ({{.InstanceName}} *{{.ModelName}}) Scan(scanner interface {
+	Scan(...interface{}) error
+}) error {
+	return scanner.Scan(&{{.InstanceName}}.ID, {{join (mapPrefix (mapPrefix .FieldNames (suffix .InstanceName ".")) "&") ", "}}, &{{.InstanceName}}.CreatedOn, &{{.InstanceName}}.ModifiedOn)
+}
+
+// Create User
+func ({{.InstanceName}} *{{.ModelName}}) Create(tx *sql.Tx) error {
+	log.Printf("db.{{.ModelName}}.Create %s", {{.InstanceName}}.ID)
+
+	now := time.Now()
+
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`INSERT INTO `)
+	stmt.WriteString({{.InstanceName}}Table)
+	stmt.WriteString(` (id, {{join (mapUnderscore .FieldNames) ", "}}, created_on) VALUES (?, {{range $f := .FieldNames}}?, {{end}}, ?)`)
+
+	log.Printf("SQL QUERY: %s: with values %s, {{range $field := .FieldNames}}%s, {{end}}%s", stmt.String(), {{.InstanceName}}.ID, {{$self := .}}{{range $field := .FieldNames}}{{$self.InstanceName}}.{{$field}}, {{end}}now)
+
+	_, err := tx.Exec(stmt.String(), {{.InstanceName}}.ID, {{$self := .}}{{range $field := .FieldNames}}{{$self.InstanceName}}.{{$field}}, {{end}}now)
+	return err
+}
+
+// Load user data by user ID
+func ({{.InstanceName}} *{{.ModelName}}) Load(tx *sql.Tx, id string) error {
+	log.Printf("db.{{.ModelName}}.Load %s", id)
+
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString({{.InstanceName}}SelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString({{.InstanceName}}Table)
+	stmt.WriteString(` WHERE id = ?`)
+
+	log.Printf("SQL QUERY: %s: with values %s", stmt.String(), id)
+
+	row := tx.QueryRow(stmt.String(), id)
+
+	if err := {{.InstanceName}}.Scan(row); err != nil {
+		return errors.Wrap(err, "scanning row")
+	}
+	return nil
+}
+
+// Update user
+func ({{.InstanceName}} *{{.ModelName}}) Update(tx *sql.Tx) error {
+	if {{.InstanceName}}.ID == "" {
+		return errors.New(`{{.InstanceName}} ID is not valid`)
+	}
+	log.Printf("db.{{.ModelName}}.Update %s", {{.InstanceName}}.ID)
+
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`UPDATE `)
+	stmt.WriteString({{.InstanceName}}Table)
+	stmt.WriteString(` SET {{join (mapSuffix (mapUnderscore .FieldNames) " = ?") ", "}} WHERE id = ?`)
+	log.Printf("SQL QUERY: %s: with values %s, %s, %s", stmt.String(), {{range $_, $fieldName := .FieldNames}}{{$self.InstanceName}}.{{$fieldName}}, {{end}}{{.InstanceName}}.ID)
+
+	_, err := tx.Exec(stmt.String(), {{range $_, $fieldName := .FieldNames}}{{$self.InstanceName}}.{{$fieldName}}, {{end}}{{.InstanceName}}.ID)
+
+	return err
+}
+
+// Delete user from DB by user ID
+func ({{.InstanceName}} *{{.ModelName}}) Delete(tx *sql.Tx) error {
+	if {{.InstanceName}}.ID == "" {
+		return errors.New(`{{.ModelName}} ID is not valid`)
+	}
+	log.Printf("db.{{.ModelName}}.Delete %s", u.ID)
+
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`DELETE FROM `)
+	stmt.WriteString({{.InstanceName}}Table)
+	stmt.WriteString(` WHERE id = ?`)
+	log.Printf("SQL QUERY: %s: with values %s", stmt.String(), {{.InstanceName}}.ID)
+
+	_, err := tx.Exec(stmt.String(), {{.InstanceName}}.ID)
+
+	return err
+}
+
+// Listup Users
+func ({{.InstanceNamePlural}} *{{.ModelNamePlural}}) Listup(tx *sql.Tx) error {
+	log.Printf("db.{{.ModelName}}.Listup")
+
+	stmt := bytes.Buffer{}
+	stmt.WriteString(`SELECT `)
+	stmt.WriteString({{.InstanceName}}SelectColumns)
+	stmt.WriteString(` FROM `)
+	stmt.WriteString({{.InstanceName}}Table)
+
+	log.Printf("SQL QUERY: %s", stmt.String())
+
+	rows, err := tx.Query(stmt.String())
+	if err != nil {
+		return errors.Wrap(err, `querying stmt`)
+	}
+	if err := {{.InstanceNamePlural}}.FromRows(rows); err != nil {
+		return errors.Wrap(err, "scanning rows")
+	}
+	return nil
+}
+
+// FromRows scanning rows into user list
+func ({{.InstanceNamePlural}} *{{.ModelNamePlural}}) FromRows(rows *sql.Rows) error {
+	log.Printf("db.{{.ModelName}}.FromRows")
+
+	res := {{.ModelNamePlural}}{}
+
+	for rows.Next() {
+		{{.InstanceName}} := {{.ModelName}}{}
+		if err := {{.InstanceName}}.Scan(rows); err != nil {
+			return errors.Wrap(err, `scanning row`)
+		}
+		res = append(res, {{.InstanceName}})
+	}
+	*{{.InstanceNamePlural}} = res
+	return nil
+}
