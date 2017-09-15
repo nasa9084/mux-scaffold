@@ -17,7 +17,7 @@ go get github.com/nasa9084/mux-scaffold
 mux-scaffold init <project path>
 ```
 
-### Create a model
+### Creating a model
 
 ``` shell
 mux-scaffold model <model name> <field name>:<field type> ...
